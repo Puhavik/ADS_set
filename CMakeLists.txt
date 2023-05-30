@@ -3,4 +3,4 @@ project(ads)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(ads ADS_set.h simpletest.cpp)
+add_executable(ads ADS_set.h simpletest.cpp OldVersions.cpp main.cpp btest.cpp)
