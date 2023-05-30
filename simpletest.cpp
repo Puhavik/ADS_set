@@ -7,7 +7,7 @@ static constexpr char version[] {"20220614"};
 //
 // Die Zurverfügungstellung des Programmes oder Teilen davon auf anderen Plattformen,
 // Repositories, etc. ist nicht zulässig.
-//
+
 // BEACHTEN:
 // (1) Der Elementdatentyp muss mit Compileroption -DETYPE=<typ> festgelegt werden,
 //     also zb -DETYPE=std::string. <typ> muss zum Testen Ein- und -Ausgabe über Streams
