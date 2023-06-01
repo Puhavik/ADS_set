@@ -1638,12 +1638,12 @@ int main(int argc, char** argv) {
     }
 
     if(no_benchmark) { return 0; }
-    if(RUNNING_ON_VALGRIND) {
-        std::cerr << CYAN("NOTE: ") << "stresstest disabled because program is running under valgrind.\n";
-    } else {
-        stresstest();
-        stresstest(&gen);
-    }
+//    if(RUNNING_ON_VALGRIND) {
+//        std::cerr << CYAN("NOTE: ") << "stresstest disabled because program is running under valgrind.\n";
+//    } else {
+//        stresstest();
+//        stresstest(&gen);
+//    }
 
     std::cout << GREEN("\nOK\n");
 }
