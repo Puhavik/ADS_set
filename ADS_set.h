@@ -161,21 +161,36 @@ public:
         return true; // if everything is equla returning true
     }
 
+
 //  Like previous method but true and false are changed
     friend bool operator!=(const ADS_set &lhs, const ADS_set &rhs) {
         return !(lhs == rhs); // using reversed operator==
     }
 };
 
+//template<typename Key, size_t N>
+//void ADS_set<Key, N>::add(const key_type &key) {
+//    size_type idx{h(key)}; // receiving hash number from key
+//    if (table[idx].mode == Mode::used) { // if there is an element with same hash in the table
+//        auto *first = new Element{table[idx].key, Mode::free,
+//                                  table[idx].next}; // creating a buffer with old first element
+//        table[idx].key = key; // new element adds to the ADS_set table
+//        table[idx].mode = Mode::used; // Box of this new element has Mode - used
+//        table[idx].next = first; // new first element has a reference to the old first element
+//    } else { // if there is no collisions new element just adds to the ADS_set table
+//        table[idx].key = key; // box with index idx now has key value
+//        table[idx].mode = Mode::used; // mode = used
+//        table[idx].next = nullptr; // this box has no references to the next element, because it's the only one element with this index
+//    }
+//    ++current_size; // increasing number of added elements
+//}
+
 template<typename Key, size_t N>
 void ADS_set<Key, N>::add(const key_type &key) {
     size_type idx{h(key)}; // receiving hash number from key
     if (table[idx].mode == Mode::used) { // if there is an element with same hash in the table
-        auto *first = new Element{table[idx].key, Mode::free,
-                                  table[idx].next}; // creating a buffer with old first element
-        table[idx].key = key; // new element adds to the ADS_set table
-        table[idx].mode = Mode::used; // Box of this new element has Mode - used
-        table[idx].next = first; // new first element has a reference to the old first element
+        auto *new_element = new Element{key, Mode::used, table[idx].next}; // creating a new element
+        table[idx].next = new_element; // new element is added to the existing list
     } else { // if there is no collisions new element just adds to the ADS_set table
         table[idx].key = key; // box with index idx now has key value
         table[idx].mode = Mode::used; // mode = used
@@ -183,6 +198,7 @@ void ADS_set<Key, N>::add(const key_type &key) {
     }
     ++current_size; // increasing number of added elements
 }
+
 
 template<typename Key, size_t N>
 typename ADS_set<Key, N>::Element *ADS_set<Key, N>::locate(const key_type &key) const {
@@ -352,7 +368,7 @@ typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) 
                     ptr->next = toDelete->next; // setting current next as next after deleted element
                     delete toDelete; // deleting element
                 } else {
-                    ptr->mode = Mode::free; // setting ptr's mode to free
+                    ptr->mode = Mode::free; // setting par's mode to free
                 }
             } else {
                 prev->next = ptr->next; // previous next is now current pointer next
@@ -361,7 +377,7 @@ typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) 
             --current_size; // reduce number of elements in the table
             return 1;
         }
-        prev = ptr; // setting privous pointer as current pointer
+        prev = ptr; // setting previous pointer as current pointer
         ptr = ptr->next; // setting current pointer as next pointer
     }
     return 0;
@@ -397,7 +413,7 @@ typename ADS_set<Key, N>::const_iterator ADS_set<Key, N>::begin() const {
 
 template<typename Key, size_t N>
 typename ADS_set<Key, N>::const_iterator ADS_set<Key, N>::end() const {
-    return const_iterator(); // returning const iterator to 
+    return const_iterator(); // returning const iterator
 }
 
 template<typename Key, size_t N>
