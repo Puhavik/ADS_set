@@ -320,8 +320,7 @@ std::pair<typename ADS_set<Key, N>::iterator, bool> ADS_set<Key, N>::insert(cons
     if (current_pos) {
         return {iterator(current_pos, table, h(key), table_size), false};
     } else {
-        float load_factor = static_cast<float>(current_size) / static_cast<float>(table_size);
-        if (load_factor >= 0.7) {
+        if (static_cast<float>(current_size) / static_cast<float>(table_size) >= 0.7) {
             reserve(table_size * 2);
         }
         add(key);
@@ -329,20 +328,40 @@ std::pair<typename ADS_set<Key, N>::iterator, bool> ADS_set<Key, N>::insert(cons
     }
 }
 
+//template<typename Key, size_t N>
+//template<typename InputIt>
+//void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
+//    for (auto it{first}; it != last; ++it) { // iterating from first element to the last element
+//        if (!count(*it)) { // check if there is no element with key *it in my table
+//            if (static_cast<float>(current_size) / static_cast<float>(table_size) >=0.7) { // checking load factor of my table. f load factor smaller than 0.7
+//                reserve(table_size * 2); // rehash table
+//            }
+//            add(*it); // adding ket = *it
+//        }
+//    }
+//}
+//template<typename Key, size_t N>
+//template<typename InputIt>
+//void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
+//    size_type num_elements = std::distance(first, last); // Calculate the number of elements to be inserted
+//    if (current_size + num_elements >= table_size * 0.7) { // Check if the hash table needs to be resized
+//        reserve(table_size * 2); // Resize the table
+//    }
+//
+//    for (auto it{first}; it != last; ++it) { // Iterate from the first element to the last element
+//        if (!count(*it)) { // Check if there is no element with key *it in the hash table
+//            add(*it); // Add the key = *it
+//        }
+//    }
+//}
 template<typename Key, size_t N>
 template<typename InputIt>
 void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
-    for (auto it{first}; it != last; ++it) { // iterating from first element to the last element
-        if (!count(*it)) { // check if there is no element with key *it in my table
-            float load_factor = static_cast<float>(current_size) /
-                                static_cast<float>(table_size); // checking load factor of my table
-            if (load_factor >= 0.7) { // if load factor smaller than 0.7
-                reserve(table_size * 2); // rehash table
-            }
-            add(*it); // adding ket = *it
-        }
+    for (auto it{first}; it != last; ++it) { // Iterate from the first element to the last element
+        insert(*it);
     }
 }
+
 
 template<typename Key, size_t N>
 void ADS_set<Key, N>::clear() {
