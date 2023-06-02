@@ -362,45 +362,76 @@ void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
     }
 }
 
-
 template<typename Key, size_t N>
 void ADS_set<Key, N>::clear() {
     ADS_set buffer; // creating new default empty table
     swap(buffer); // replacing my table with buffer table.
 }
 
+//template<typename Key, size_t N>
+//typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) {
+//    size_type idx{h(key)}; // receiving hach of the key
+//    Element *ptr = &table[idx]; // creating pointer to table's index
+//    Element *prev{nullptr}; // creating pointer to the previous element in table (horizontal)
+//    if (ptr->mode == Mode::free) { // if first box has mode free ...
+//        return 0;
+//    }
+//    while (ptr) { // till pointer isn't equal to null. iterating horizontal
+//        if (key_equal{}(ptr->key, key)) { // checking if current pointer is equla to key
+//            if (prev ==
+//                nullptr) { // if prev pounter equal to null pointer - it means that current pointer points to the first element
+//                if (ptr->next) { // if current pointer has next element
+//                    ptr->key = ptr->next->key; // copying key from next element to current element
+//                    Element *toDelete = ptr->next; // creating pointer to the next element;
+//                    ptr->next = toDelete->next; // setting current next as next after deleted element
+//                    delete toDelete; // deleting element
+//                } else {
+//                    ptr->mode = Mode::free; // setting par's mode to free
+//                }
+//            } else {
+//                prev->next = ptr->next; // previous next is now current pointer next
+//                delete ptr; // deleting pointer
+//            }
+//            --current_size; // reduce number of elements in the table
+//            return 1;
+//        }
+//        prev = ptr; // setting previous pointer as current pointer
+//        ptr = ptr->next; // setting current pointer as next pointer
+//    }
+//    return 0;
+//}
 template<typename Key, size_t N>
 typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) {
-    size_type idx{h(key)}; // receiving hach of the key
-    Element *ptr = &table[idx]; // creating pointer to table's index
-    Element *prev{nullptr}; // creating pointer to the previous element in table (horizontal)
-    if (ptr->mode == Mode::free) { // if first box has mode free ...
+    size_type idx{h(key)};
+    Element *ptr = &table[idx];
+    if (ptr->mode == Mode::free) {
         return 0;
     }
-    while (ptr) { // till pointer isn't equal to null. iterating horizontal
-        if (key_equal{}(ptr->key, key)) { // checking if current pointer is equla to key
-            if (prev ==
-                nullptr) { // if prev pounter equal to null pointer - it means that current pointer points to the first element
-                if (ptr->next) { // if current pointer has next element 
-                    ptr->key = ptr->next->key; // copying key from next element to current element
-                    Element *toDelete = ptr->next; // creating pointer to the next element;
-                    ptr->next = toDelete->next; // setting current next as next after deleted element
-                    delete toDelete; // deleting element
-                } else {
-                    ptr->mode = Mode::free; // setting par's mode to free
-                }
-            } else {
-                prev->next = ptr->next; // previous next is now current pointer next
-                delete ptr; // deleting pointer
-            }
-            --current_size; // reduce number of elements in the table
+    if (key_equal{}(ptr->key, key)) {
+        if (ptr->next) {
+            Element *toDelete = ptr->next;
+            ptr->key = toDelete->key;
+            ptr->next = toDelete->next;
+            delete toDelete;
+        } else {
+            ptr->mode = Mode::free;
+        }
+        --current_size;
+        return 1;
+    }
+    while (ptr->next) {
+        if (key_equal{}(ptr->next->key, key)) {
+            Element *toDelete = ptr->next;
+            ptr->next = toDelete->next;
+            delete toDelete;
+            --current_size;
             return 1;
         }
-        prev = ptr; // setting previous pointer as current pointer
-        ptr = ptr->next; // setting current pointer as next pointer
+        ptr = ptr->next;
     }
     return 0;
 }
+
 
 template<typename Key, size_t N>
 typename ADS_set<Key, N>::iterator ADS_set<Key, N>::find(const key_type &key) const {
