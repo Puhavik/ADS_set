@@ -63,8 +63,11 @@ private:
     Element *locate(const key_type &key) const;
 
 //  Method which counts a place in hach table
+//    size_type h(const key_type &key) const {
+//        return hasher{}(key) % table_size;
+//    }
     size_type h(const key_type &key) const {
-        return hasher{}(key) % table_size;
+        return hasher{}(key) & (table_size - 1);
     }
 
 //  Method which reserves place for elements
