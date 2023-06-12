@@ -37,9 +37,9 @@ private:
   4. Element() = default -- this is a default constructor without parameters.
   5. Element(key_type key, Mode mode, Element *next) : key(key), mode(mode), next(next) {} -- this is constructor with parameters.
 */
-    struct Element {  //ячейка
-        key_type key; // элемен, который вставляем
-        Mode mode{Mode::free}; // если в ячейку вставлено знаечение то меняется на used
+    struct Element {  // Block in my Table
+        key_type key; // Value that i indert and make hashing
+        Mode mode{Mode::free}; // Mode of a block. Used if its first and not empty. Default -- free
         Element *next{nullptr};
 
         Element() = default;
@@ -62,13 +62,10 @@ private:
 //  Method which finds an element in the table
     Element *locate(const key_type &key) const;
 
-//  Method which counts a place in hach table
-//    size_type h(const key_type &key) const {
-//        return hasher{}(key) % table_size;
-//    }
-    size_type h(const key_type &key) const {
-        return hasher{}(key) & (table_size - 1);
-    }
+ // Method which counts a place in hach table
+   size_type h(const key_type &key) const {
+       return hasher{}(key) % table_size;
+   }
 
 //  Method which reserves place for elements
     void reserve(size_type i);
@@ -77,10 +74,6 @@ private:
     void rehash(size_type i);
 
 public:
-//     Old Version
-//    ADS_set() : table{new Element[N]}, table_size{N}, current_size{0} {};
-
-//     New version
 //  This is a default constructor without parameters
 //  rehash(N) creates a set with default table_size = 7
     ADS_set() { rehash(N); };
@@ -170,23 +163,6 @@ public:
         return !(lhs == rhs); // using reversed operator==
     }
 };
-
-//template<typename Key, size_t N>
-//void ADS_set<Key, N>::add(const key_type &key) {
-//    size_type idx{h(key)}; // receiving hash number from key
-//    if (table[idx].mode == Mode::used) { // if there is an element with same hash in the table
-//        auto *first = new Element{table[idx].key, Mode::free,
-//                                  table[idx].next}; // creating a buffer with old first element
-//        table[idx].key = key; // new element adds to the ADS_set table
-//        table[idx].mode = Mode::used; // Box of this new element has Mode - used
-//        table[idx].next = first; // new first element has a reference to the old first element
-//    } else { // if there is no collisions new element just adds to the ADS_set table
-//        table[idx].key = key; // box with index idx now has key value
-//        table[idx].mode = Mode::used; // mode = used
-//        table[idx].next = nullptr; // this box has no references to the next element, because it's the only one element with this index
-//    }
-//    ++current_size; // increasing number of added elements
-//}
 
 template<typename Key, size_t N>
 void ADS_set<Key, N>::add(const key_type &key) {
@@ -319,44 +295,18 @@ ADS_set<Key, N> &ADS_set<Key, N>::operator=(std::initializer_list<key_type> ilis
 
 template<typename Key, size_t N>
 std::pair<typename ADS_set<Key, N>::iterator, bool> ADS_set<Key, N>::insert(const key_type &key) {
-    Element *current_pos{locate(key)};
-    if (current_pos) {
-        return {iterator(current_pos, table, h(key), table_size), false};
-    } else {
-        if (static_cast<float>(current_size) / static_cast<float>(table_size) >= 0.7) {
-            reserve(table_size * 2);
+    Element *current_pos{locate(key)}; // finding a value in my table
+    if (current_pos) { // if value alredy in my table...
+        return {iterator(current_pos, table, h(key), table_size), false}; // returning iterator and bool
+    } else { // if value not found
+        if (static_cast<float>(current_size) / static_cast<float>(table_size) >= 0.7) { // checking load factor of my table
+            reserve(table_size * 2); // if table is overloaded making resizing 
         }
-        add(key);
-        return {iterator(locate(key), table, h(key), table_size), true};
+        add(key); // adding value to the table
+        return {iterator(locate(key), table, h(key), table_size), true}; // returning itarator and bool
     }
 }
 
-//template<typename Key, size_t N>
-//template<typename InputIt>
-//void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
-//    for (auto it{first}; it != last; ++it) { // iterating from first element to the last element
-//        if (!count(*it)) { // check if there is no element with key *it in my table
-//            if (static_cast<float>(current_size) / static_cast<float>(table_size) >=0.7) { // checking load factor of my table. f load factor smaller than 0.7
-//                reserve(table_size * 2); // rehash table
-//            }
-//            add(*it); // adding ket = *it
-//        }
-//    }
-//}
-//template<typename Key, size_t N>
-//template<typename InputIt>
-//void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
-//    size_type num_elements = std::distance(first, last); // Calculate the number of elements to be inserted
-//    if (current_size + num_elements >= table_size * 0.7) { // Check if the hash table needs to be resized
-//        reserve(table_size * 2); // Resize the table
-//    }
-//
-//    for (auto it{first}; it != last; ++it) { // Iterate from the first element to the last element
-//        if (!count(*it)) { // Check if there is no element with key *it in the hash table
-//            add(*it); // Add the key = *it
-//        }
-//    }
-//}
 template<typename Key, size_t N>
 template<typename InputIt>
 void ADS_set<Key, N>::insert(InputIt first, InputIt last) {
@@ -371,48 +321,16 @@ void ADS_set<Key, N>::clear() {
     swap(buffer); // replacing my table with buffer table.
 }
 
-//template<typename Key, size_t N>
-//typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) {
-//    size_type idx{h(key)}; // receiving hach of the key
-//    Element *ptr = &table[idx]; // creating pointer to table's index
-//    Element *prev{nullptr}; // creating pointer to the previous element in table (horizontal)
-//    if (ptr->mode == Mode::free) { // if first box has mode free ...
-//        return 0;
-//    }
-//    while (ptr) { // till pointer isn't equal to null. iterating horizontal
-//        if (key_equal{}(ptr->key, key)) { // checking if current pointer is equla to key
-//            if (prev ==
-//                nullptr) { // if prev pounter equal to null pointer - it means that current pointer points to the first element
-//                if (ptr->next) { // if current pointer has next element
-//                    ptr->key = ptr->next->key; // copying key from next element to current element
-//                    Element *toDelete = ptr->next; // creating pointer to the next element;
-//                    ptr->next = toDelete->next; // setting current next as next after deleted element
-//                    delete toDelete; // deleting element
-//                } else {
-//                    ptr->mode = Mode::free; // setting par's mode to free
-//                }
-//            } else {
-//                prev->next = ptr->next; // previous next is now current pointer next
-//                delete ptr; // deleting pointer
-//            }
-//            --current_size; // reduce number of elements in the table
-//            return 1;
-//        }
-//        prev = ptr; // setting previous pointer as current pointer
-//        ptr = ptr->next; // setting current pointer as next pointer
-//    }
-//    return 0;
-//}
 template<typename Key, size_t N>
 typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) {
-    size_type idx{h(key)};
-    Element *ptr = &table[idx];
-    if (ptr->mode == Mode::free) {
-        return 0;
+    size_type idx{h(key)}; // finding element's place via hashing
+    Element *ptr = &table[idx]; // creating pointer to place in table with index = idx (place in table)
+    if (ptr->mode == Mode::free) { // if this place is free
+        return 0; // returning 0
     }
-    if (key_equal{}(ptr->key, key)) {
-        if (ptr->next) {
-            Element *toDelete = ptr->next;
+    if (key_equal{}(ptr->key, key)) { // if pointer to a current element equals to an element we are searching
+        if (ptr->next) { // checking if an element i want to delete has the next element
+            Element *toDelete = ptr->next; // creating pointer to an element i want to delete
             ptr->key = toDelete->key;
             ptr->next = toDelete->next;
             delete toDelete;
@@ -422,7 +340,7 @@ typename ADS_set<Key, N>::size_type ADS_set<Key, N>::erase(const key_type &key) 
         --current_size;
         return 1;
     }
-    while (ptr->next) {
+    while (ptr->next) { // itereating horizontaly till finding an element
         if (key_equal{}(ptr->next->key, key)) {
             Element *toDelete = ptr->next;
             ptr->next = toDelete->next;
@@ -497,9 +415,9 @@ class ADS_set<Key, N>::Iterator {
     size_type idx;
     size_type table_size;
 
-    void skip() {
-        while (table[idx].mode != Mode::used && table_size > idx) {
-            ++idx;
+    void skip() { // function to skip
+        while (table[idx].mode != Mode::used && table_size > idx) { // iterating through the table vertically till finding a used place
+            ++idx; // increaseing in index
         }
     };
 
@@ -515,32 +433,32 @@ public:
                                                   table_size{table_size} {}
 
     reference operator*() const {
-        return current_pos->key;
+        return current_pos->key; // returning value of the current ponter
     }
 
     pointer operator->() const {
-        return &current_pos->key;
+        return &current_pos->key; //returning addres of a current pointer
     }
 
     Iterator &operator++() {
-        if (current_pos->next && current_pos) {
-            current_pos = current_pos->next;
-        } else {
-            ++idx;
-            skip();
-            if (idx == table_size) {
-                current_pos = nullptr;
-                return *this;
+        if (current_pos && current_pos->next) { // if current positoin and next possitiong isnt null
+            current_pos = current_pos->next; // reassigning current possition
+        } else { // if smth is null
+            ++idx; // going to the next place (verticaly)
+            skip(); // skiping in case current index is free
+            if (idx == table_size) { // if end of the table reached (vertically) 
+                current_pos = nullptr; // current position is null
+                return *this; // returning reference to a current iterator obj
             }
-            current_pos = &table[idx];
+            current_pos = &table[idx]; // updatin current positon to the next plece in hash table (verticaly)
         }
-        return *this;
+        return *this; // returning reference to a current iterator obj
     }
 
     Iterator operator++(int) {
-        auto ret_code{*this};
-        ++*this;
-        return ret_code;
+        auto ret_code{*this}; // creating buffer to return
+        ++*this; // iterating to the next
+        return ret_code; // returning buffer
     }
 
     friend bool operator==(const Iterator &lhs, const Iterator &rhs) {
