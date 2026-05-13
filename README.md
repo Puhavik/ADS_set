@@ -1,72 +1,76 @@
-# ADS_set — хеш-таблица с separate chaining на C++
+# ADS_set — Hash Set with Separate Chaining (C++)
 
-Реализация учебного контейнера `ADS_set` (аналог множества), выполненная в рамках курса **Algorithmen und Datenstrukturen 1 (University of Vienna)**.
+This repository contains an educational implementation of a custom set container, `ADS_set`, created for the **Algorithms and Data Structures 1** course at the University of Vienna.
 
-Контейнер хранит **уникальные элементы** и использует:
-- хеширование через `std::hash<Key>`;
-- сравнение ключей через `std::equal_to<Key>`;
-- разрешение коллизий методом **separate chaining** (связные списки в бакетах).
+`ADS_set` stores **unique keys** and is implemented as a hash table with **separate chaining** for collision handling.
 
-## Возможности контейнера
+## Key Characteristics
 
-В `ADS_set` реализованы основные операции множества:
+- Uses `std::hash<Key>` to compute bucket indices.
+- Uses `std::equal_to<Key>` for key equality checks.
+- Handles collisions with linked chains inside buckets.
+- Supports common set operations similar to `std::set`/`std::unordered_set` semantics (unique elements, no duplicates).
 
-- конструкторы:
-  - по умолчанию (`ADS_set()`),
-  - из `initializer_list`,
-  - из диапазона итераторов,
-  - копирующий конструктор;
-- присваивание:
-  - копирующее,
-  - из `initializer_list`;
-- модификация:
+## Implemented API
+
+The container includes:
+
+- Constructors:
+  - default constructor,
+  - initializer-list constructor,
+  - range constructor (`first`, `last`),
+  - copy constructor.
+- Assignment:
+  - copy assignment,
+  - assignment from initializer list.
+- Modifiers:
   - `insert(const key_type&)`,
   - `insert(first, last)`,
   - `erase(const key_type&)`,
   - `clear()`,
-  - `swap(...)`;
-- поиск и доступ:
+  - `swap(...)`.
+- Lookup:
   - `count(const key_type&)`,
-  - `find(const key_type&)`;
-- сервисные методы:
+  - `find(const key_type&)`.
+- Capacity/iteration/debug:
   - `size()`, `empty()`,
-  - `begin()/end()` (константные итераторы),
-  - `dump()` для отладки.
+  - `begin()`, `end()`,
+  - `dump()`.
 
-## Структура проекта
+## Repository Structure
 
-- `ADS_set.h` — основная реализация шаблонного контейнера;
-- `simpletest.cpp` — интерактивный/ручной тестовый стенд;
-- `btest.cpp` — расширенный тест (в т.ч. стресс и проверки поведения).
+- `ADS_set.h` — template implementation of the container.
+- `simpletest.cpp` — interactive/basic test program.
+- `btest.cpp` — more extensive test suite.
 
-## Как собрать и запустить
+## Build and Run
 
-> Требуется компилятор с поддержкой **C++17** (`g++`/`clang++`).
+A compiler with **C++17** support is required.
 
-### 1) Сборка `simpletest`
+### Build `simpletest`
 
-Пример для ключей типа `unsigned`:
+Example with `unsigned` keys:
 
 ```bash
 g++ -Wall -Wextra -Werror -O3 -std=c++17 -pedantic-errors -DPH2 -DETYPE=unsigned simpletest.cpp -o simpletest
 ./simpletest
 ```
 
-Пример для ключей `std::string`:
+Example with `std::string` keys:
 
 ```bash
 g++ -Wall -Wextra -Werror -O3 -std=c++17 -pedantic-errors -DPH2 -DETYPE=std::string simpletest.cpp -o simpletest
 ./simpletest
 ```
 
-### 2) Сборка `btest`
+### Build `btest`
 
 ```bash
 g++ -Wall -Wextra -Werror -O3 -std=c++17 -pedantic-errors btest.cpp -o btest
 ./btest
 ```
 
-## Пример использования `ADS_set`
+## Minimal Usage Example
 
 ```cpp
 #include "ADS_set.h"
@@ -76,7 +80,7 @@ int main() {
     ADS_set<int> s{1, 2, 3};
 
     s.insert(4);
-    s.insert(2); // дубликат не добавится
+    s.insert(2); // duplicate, will not be inserted
 
     if (s.count(3)) {
         std::cout << "3 found\n";
@@ -91,21 +95,17 @@ int main() {
 }
 ```
 
-## Принципы работы (кратко)
+## How It Works (Short Overview)
 
-- Индекс бакета вычисляется как `hash(key) % table_size`.
-- Если бакет пуст — элемент занимает головную ячейку бакета.
-- Если бакет занят — элемент добавляется в связный список бакета.
-- При росте числа элементов контейнер может расширять таблицу (`reserve`/`rehash`) и перераспределять ключи.
+- Bucket index is calculated as `hash(key) % table_size`.
+- If a bucket is empty, the key is placed in its head element.
+- If a bucket is occupied, the key is linked into that bucket’s chain.
+- When needed, the table grows and keys are redistributed via rehashing.
 
-## Ограничения и примечания
+## Notes and Limitations
 
-- Это учебная реализация, ориентированная на корректность и понимание структуры данных.
-- Производительность зависит от качества `std::hash<Key>` и распределения ключей.
-- Для пользовательских типов `Key` должны быть корректно определены:
-  - `std::hash<Key>`,
-  - `std::equal_to<Key>`.
-
----
-
-Если хотите, могу дополнительно сделать англоязычную версию README и добавить бейджи (C++ standard, build status, license).
+- This is a course-oriented implementation focused on correctness and understanding.
+- Runtime behavior depends on hash quality and key distribution.
+- For custom key types, make sure both are correctly defined:
+  - `std::hash<Key>`
+  - `std::equal_to<Key>`
